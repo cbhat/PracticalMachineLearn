@@ -1,0 +1,89 @@
+**Prediction of Weightlifting Training Quality**
+
+-----------------------------------------------------------------------
+**Background**
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. 
+One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project,  we use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. The data collected is analyzed to predict which of these participants performed the exercise correctly. 
+
+
+**Data Preparation**
+
+Both the training data and test data have been provided. We will load the data and get it ready for analysis.
+The training dataset is *harTrain* and the testdataset is *harTest*
+
+```
+harTest <- read.csv(file="pml-testing.csv",header=TRUE,sep=",")
+harTrain <- read.csv(file="pml-training.csv",header=TRUE,sep=",")
+
+# The data consists of 160 predictors. Of these only 56 attributes has raw data, the remainder has derived data like skewness, variance, mean etc.
+# Filter out all derived and second order attributes from the data sets.
+
+rawvars <- c( 2,3,4, 8:11 , 37:49, 60:68,84:86, 102, 113:124, 140, 151:160)
+
+filter_harTest <- harTest[rawvars]
+filter_harTrain <- harTrain[rawvars]
+
+# Test Attributes of interest
+
+names(filter_harTrain)
+```
+
+Check to make sure that the output filter sets do not have any NAs.
+
+
+**Data Modeling**
+
+Some of the models like classification are not scalable to handle 56 variables and 19622 data samples.
+
+For example, the following command did not return back any result even after 90 minutes of computation. 
+
+forest.model <- train(classe ~., filter_harTrain) 
+
+The random forest method was used both for its scalability and accuracy.
+
+
+Create the random forest model, *fit* using the training data set, *filter_harTrain*
+
+```
+fit <- randomForest(as.factor(classe) ~ ., data=filter_harTrain, importance=TRUE, ntree=100)
+```
+
+Let us explore the characteristics of the model created.
+
+Looking at the giniindex, we find that the timestamp is one of the most important attributes.
+The other significant attributes are also listed.
+
+```{r}
+varImpPlot(fit)
+```
+
+By plotting the model *fit*, we notice that after 25 trees, additional trees do not improve the accuracy.
+
+```{r}
+plot(fit)
+```
+
+**Prediction**
+
+
+Let us take a look at the probabilistic distribution of predicted values.
+
+```{r}
+predict(fit, filter_harTest, type = "prob")
+```
+
+The confidence of prediction is high in most cases - above 0.9 in 14/20 cases.
+Even in the remainder , the it is above 0.8.
+
+
+Finally let us take a look at the actual predictions.
+
+```{r}
+predict(fit, filter_harTest, type = "response")
+```
+
+
+
+
+predict(fit, filter_harTest, type = "response")
