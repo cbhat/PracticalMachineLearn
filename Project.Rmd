@@ -12,7 +12,8 @@ One thing that people regularly do is quantify how much of a particular activity
 Both the training data and test data have been provided. We will load the data and get it ready for analysis.
 The training dataset is *harTrain* and the testdataset is *harTest*
 
-```
+```{r}
+set.seed(4543)
 harTest <- read.csv(file="pml-testing.csv",header=TRUE,sep=",")
 harTrain <- read.csv(file="pml-training.csv",header=TRUE,sep=",")
 
@@ -45,7 +46,7 @@ The random forest method was used both for its scalability and accuracy.
 
 Create the random forest model, *fit* using the training data set, *filter_harTrain*
 
-```
+```{r}
 fit <- randomForest(as.factor(classe) ~ ., data=filter_harTrain, importance=TRUE, ntree=100)
 ```
 
